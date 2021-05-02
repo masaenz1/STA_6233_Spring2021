@@ -1,0 +1,303 @@
+
+---
+title: "NFL Quarterback Statistics"
+author: "Michael Saenz"
+date: "05/02/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### NFL QuarterBack Statistics
+
+What are statistics that we need to talk about add the details and what we have found out about [Link to ESPN Stats](https://www.espn.com/nfl/stats/player/_/table/passing/sort/passingYards/dir/desc) . 
+
+It may be helpful to refer to the following resources while developing shiny apps including the [Shiny Cheatsheet](https://shiny.rstudio.com/images/shiny-cheatsheet.pdf), this [tutorial](https://shiny.rstudio.com/tutorial/), these [Shiny instructional videos](https://resources.rstudio.com/shiny-2), and especially this [Shiny workshop](https://github.com/mattdemography/shinymark) by Daniel Kaplan which was heavily referenced in the creation of this lesson.
+
+Add extra paragraph here.   
+
+
+#### **Quarterback Stats over the years: Visualization**  
+You start building a shiny app by clicking *File -> New File -> Shiny Web App* and choosing a name for the application. The code below creates the attached application. We will then go through each section so that you can better understand the app components.
+
+
+```{r first, echo=FALSE, message=FALSE, warning=FALSE}
+#Load the Library
+
+library(shiny)
+library(ggplot2)
+library(plotly)
+load(url("https://github.com/masaenz1/STA_6233_Spring2021/blob/main/Data_project_2/qbstatstotal.RData?raw=true"))
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+  
+  # Application title
+  titlePanel("QBSTATS"),
+  
+  # Sidebar layout
+  sidebarLayout(
+    #Inputs: Select which inputs from the data we want to display
+    sidebarPanel(
+      #Select variable for y-axis
+      selectInput(inputId = "y", 
+                  label = "Y-axis:",
+                  choices = c("YDS", "RTG", "TD", "QBR", "CMP"), 
+                  selected = "YDS"),
+      #Select X-axix variables
+      selectInput(inputId = "x", 
+                  label = "X-axis:",
+                  choices = c("YEAR"), 
+                  selected = "YEAR"),
+      
+      
+      # Select Colors
+      selectInput(inputId = "thecolors", 
+                  label = "Choose Your Point Color",
+                  choices = c("red", "green", "blue", "black"), 
+                  selected = "black"),
+    ),
+    
+    #Output: Type of plot
+    mainPanel(
+      plotlyOutput(outputId = "FreqTab") #Any name can go where "FreqTab" is, but be sure to keep it consistent with name in output$FreqTab in the server section
+    )
+  )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$FreqTab <- renderPlotly({
+    # draw the histogram with the specified number of bins
+    ggplot(qbstats, aes_string(x=input$x, y=input$y)) + geom_line( color="grey40") + geom_point(colour=input$thecolors, size=2, shape=23) + geom_smooth(method=lm, se=FALSE) + scale_x_continuous(breaks=c(2004,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020))  
+    
+    
+    #Notice the difference between the ggplots
+  })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+  
+#### **Breakout of Statistics **  
+
+Let's take a closer look at this simple app. First notice that we bring in two different libraries and load a dataset of the format 'RData' from github. Loading .csv directly does not work in the shiny environment. You will need to either 1) host the data remotely via a cloud service as I am here, 2) you will need to create a data folder inside of your Shiny app folder and load a .RData file or .rds file, or 3) load the data into the script itself like the template example that appears when you start your first shiny app using RStudio.
+
+```{r QB stat yards, echo=FALSE, warning=FALSE, message=FALSE}
+#Load the Library
+
+library(shiny)
+library(ggplot2)
+load(url("https://github.com/masaenz1/STA_6233_Spring2021/blob/main/Data_project_2/qbstatstotal.RData?raw=true"))
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    # Application title
+    titlePanel("Quarterback Stats- Yards per Season"),
+    
+    
+    #Output: Type of plot
+    mainPanel(
+      plotOutput(outputId = "FreqTab") #Any name can go where "FreqTab" is, but be sure to keep it consistent with name in output$FreqTab in the server section
+    )
+  )
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$FreqTab <- renderPlot({
+    # draw the histogram with the specified number of bins
+    ggplot(qbstats, aes(x=YEAR, y=YDS)) + geom_bar(stat = "identity", fill="aquamarine3") + geom_text(aes(label = YDS), vjust = -0.2, size=3) + ylim(0, 6000) +scale_x_continuous(breaks=c(2004,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020))  #Notice the difference between the ggplots
+  })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
+
+```
+
+
+###### **Summary data points for YDS** 
+
+```{r ui2, eval=TRUE, echo=FALSE}    
+# Sidebar layout
+summary(qbstats$YDS)
+
+```
+Add text here that added details and information behind the Yards per season for the QBs
+
+
+
+
+```{r qbstat TD, echo=FALSE, warning=FALSE, message=FALSE}
+#Load the Library
+
+library(shiny)
+library(ggplot2)
+load(url("https://github.com/masaenz1/STA_6233_Spring2021/blob/main/Data_project_2/qbstatstotal.RData?raw=true"))
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    # Application title
+    titlePanel("Quarterback Stats- Touchdowns per Season"),
+    
+    
+    #Output: Type of plot
+    mainPanel(
+      plotOutput(outputId = "FreqTab") #Any name can go where "FreqTab" is, but be sure to keep it consistent with name in output$FreqTab in the server section
+    )
+  )
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$FreqTab <- renderPlot({
+    # draw the histogram with the specified number of bins
+    ggplot(qbstats, aes(x=YEAR, y=TD)) + geom_bar(stat = "identity", fill="azure4") + geom_text(aes(label = TD), vjust = -0.2, size=4) + ylim(0, 45) +scale_x_continuous(breaks=c(2004,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020))  #Notice the difference between the ggplots
+  })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+
+###### **Summary data points for Touchdowns** 
+```{r summary TD, eval=TRUE, echo=FALSE}    
+# Sidebar layout
+summary(qbstats$TD)
+```
+Add text here that added details and information behind the TD per season for the QBs
+
+
+
+
+
+```{r qbstat completion, echo=FALSE, warning=FALSE, message=FALSE}
+#Load the Library
+
+library(shiny)
+library(ggplot2)
+load(url("https://github.com/masaenz1/STA_6233_Spring2021/blob/main/Data_project_2/qbstatstotal.RData?raw=true"))
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    # Application title
+    titlePanel("Quarterback Stats- Completion Percentage per Season"),
+    
+    
+    #Output: Type of plot
+    mainPanel(
+      plotOutput(outputId = "FreqTab") #Any name can go where "FreqTab" is, but be sure to keep it consistent with name in output$FreqTab in the server section
+    )
+  )
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$FreqTab <- renderPlot({
+    # draw the histogram with the specified number of bins
+    ggplot(qbstats, aes(x=YEAR, y=CMP)) + geom_bar(stat = "identity", fill="deepskyblue4") + geom_text(aes(label = CMP), vjust = -0.2, size=3) + ylim(0, 75) +scale_x_continuous(breaks=c(2004,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020))  #Notice the difference between the ggplots
+  })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+
+###### **Summary data points for Completion Percentages** 
+```{r summary CMP, eval=TRUE, echo=FALSE}    
+# Sidebar layout
+summary(qbstats$CMP)
+```
+Add text here that added details and information behind the completion percentage per season for the QBs
+
+
+
+
+
+```{r qbstat rating, echo=FALSE, warning=FALSE, message=FALSE}
+#Load the Library
+
+library(shiny)
+library(ggplot2)
+load(url("https://github.com/masaenz1/STA_6233_Spring2021/blob/main/Data_project_2/qbstatstotal.RData?raw=true"))
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    # Application title
+    titlePanel("Quarterback Stats- Quarterback Ratings per Season"),
+    
+    
+    #Output: Type of plot
+    mainPanel(
+      plotOutput(outputId = "FreqTab") #Any name can go where "FreqTab" is, but be sure to keep it consistent with name in output$FreqTab in the server section
+    )
+  )
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$FreqTab <- renderPlot({
+    # draw the histogram with the specified number of bins
+    ggplot(qbstats, aes(x=YEAR, y=RTG)) + geom_bar(stat = "identity", fill="darkseagreen") + geom_text(aes(label = RTG), vjust = -0.2, size=3) + ylim(0, 110) +scale_x_continuous(breaks=c(2004,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020))  #Notice the difference between the ggplots
+  })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+
+###### **Summary data points for QB Ratigns** 
+```{r summary RTG, eval=TRUE, echo=FALSE}    
+# Sidebar layout
+summary(qbstats$RTG)
+```
+Add text here that added details and information behind the QB Ratings percentage per season for the QBs
+
+
+
+
+
+
+```{r qbstat QBR, echo=FALSE, warning=FALSE, message=FALSE}
+#Load the Library
+
+library(shiny)
+library(ggplot2)
+load(url("https://github.com/masaenz1/STA_6233_Spring2021/blob/main/Data_project_2/qbstatstotal.RData?raw=true"))
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    # Application title
+    titlePanel("Quarterback Stats- QBR per Season"),
+    
+    
+    #Output: Type of plot
+    mainPanel(
+      plotOutput(outputId = "FreqTab") #Any name can go where "FreqTab" is, but be sure to keep it consistent with name in output$FreqTab in the server section
+    )
+  )
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$FreqTab <- renderPlot({
+    # draw the histogram with the specified number of bins
+    ggplot(qbstats, aes(x=YEAR, y=QBR)) + geom_bar(stat = "identity", fill="coral3") + geom_text(aes(label = QBR), vjust = -0.2, size=3) + ylim(0, 75) +scale_x_continuous(breaks=c(2004,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020))  #Notice the difference between the ggplots
+  })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+
+###### **Summary data points for QBR specific Ratigns** 
+```{r summary QBR, eval=TRUE, echo=FALSE}    
+# Sidebar layout
+summary(qbstats$QBR)
+```
+Add text here that added details and information behind the QBR sepcific Ratings percentage per season for the QBs
+
+
